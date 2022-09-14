@@ -1,25 +1,42 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Suspense } from 'react';
+import './App.scss';
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import RouteError from './views/route-error/RouteError';
+import NotFound from './views/not-found/NotFound';
+import './scss/style.scss'
+import DefaultLayout from './layouts/default-layout';
+import appContentRouter from './routes';
+
+const Login = React.lazy(() => import('./views/login/Login'))
+
+const router = createBrowserRouter([
+  {
+    path: 'login',
+    element: <Login />,
+  },
+  {
+    path: 'home',
+    element: <DefaultLayout />,
+    children: [
+      ...appContentRouter,
+      {
+        path: '',
+        element: <Navigate to="dashboard" replace />
+      },
+    ]
+  },
+  {
+    path: '*',
+    element: <NotFound />,
+    errorElement: <RouteError />
+  }
+])
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Suspense fallback={<h1>loading...</h1>}>
+      <RouterProvider router={router} />
+    </Suspense>
   );
 }
 
